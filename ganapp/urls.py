@@ -3,7 +3,9 @@ from . import views
 from ganapp.signup import signup
 from .views import archive_view
 from .views import delete_image
+from ganapp.signup import activate
 
+app_name = 'account'
 urlpatterns = [
     path("", views.login_view, name="login"),
     path('accounts/signup/', signup, name='account_signup'),
@@ -11,6 +13,8 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("archive/", archive_view, name="archive"),
     path("delete_image/<int:image_id>/", delete_image, name="delete_image"),
-    # ...
+    path('activate/<str:uidb64>/<str:token>/', activate, name='activate'),
+  
+  # ...
     # Diğer URL tanımları
 ]
