@@ -1,22 +1,38 @@
-from base64 import urlsafe_b64encode
+import hmac
+import hashlib
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib.auth import login
-from django.shortcuts import redirect
-from django.contrib import messages
 from django.shortcuts import render
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib import messages
+from django.contrib.auth.models import User 
+
+def create_token(user):
+    msg = str(user.pk) + user.password + str(user.is_active)
+    secret = settings.SECRET_KEY.encode()
+    token = hmac.new(secret, msg.encode(), hashlib.sha256).digest()
+    return token.hex()  # convert bytes to hex string for URL safe
+
+def check_token(user, token):
+    expected_token = create_token(user)
+    token_bytes = bytes.fromhex(token)  # convert hex string back to bytes
+    print(token_bytes)
+    print(expected_token)
+    return hmac.compare_digest(expected_token, token_bytes)
+
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField()
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ("username", "email", "password1", "password2")
 
 
@@ -28,8 +44,7 @@ def signup(request):
             user.is_active = False
             user.save()
             
-            print(user.pk)
-            token = default_token_generator.make_token(user)
+            token = create_token(user)
             print(token)
             mail_subject = 'Activate your account.'
             message = render_to_string('account/email/email_confirmation_signup.html', {
@@ -46,6 +61,7 @@ def signup(request):
             context = {"form": form}
             return render(request, "account/email_sent.html", context)
         else:
+            # Handle errors...
             error_occurred = False
             for field, errors in form.errors.items():
                 for error in errors:
@@ -58,21 +74,16 @@ def signup(request):
             context = {"form": form}
     else:
         form = SignUpForm()
-
-    context = {"form": form}
+        context = {"form": form}
+    
     return render(request, "account/signup.html", context)
+
 
 def activate(request, uidb64, token):
     try:
-        print( "yes")
         uid = force_str(urlsafe_base64_decode(uidb64))
-        print(uid)
-        user = User.objects.get(pk=uid)
-        print(user)
-        print(token)
-        return render(request, "account/activation_success.html")
-
-        if default_token_generator.check_token(user, token):
+        user = get_user_model().objects.get(pk=uid)
+        if check_token(user, token):
             user.is_active = True
             user.save()
             login(request, user)
