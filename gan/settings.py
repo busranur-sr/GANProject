@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from allauth.account import app_settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,6 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "ganapp",
+    "django.contrib.sites",
     "allauth",
     "allauth.account",
     
@@ -104,3 +106,28 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 LOGIN_REDIRECT_URL = "home"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+#Kimlik doğrulama işlemleri
+SITE_ID = 1  # varsayılan site kimliği (genellikle 1'dir)
+
+DEFAULT_FROM_EMAIL = 'GANAPP@gmail.com'  # E-postaların gönderileceği varsayılan e-posta adresi
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Kullanıcının e-posta adresini doğrulama zorunluluğu
+ACCOUNT_EMAIL_SUBJECT_PREFIX = 'GANAPP e-posta doğrulama'  # E-posta konusu için önek
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # SMTP e-posta gönderimi için
+EMAIL_HOST = 'smtp.gmail.com'  # SMTP sunucu adresi
+EMAIL_PORT = 587  # SMTP sunucu bağlantı noktası
+EMAIL_HOST_USER = 'sariakce.busra.nur@gmail.com'  # SMTP sunucusu kullanıcı adı
+EMAIL_HOST_PASSWORD = 'mymuvbuikzuowigw'  # SMTP sunucusu parolası
+EMAIL_USE_TLS = True  # TLS kullanarak e-posta gönderimi
+
+
+assert app_settings.AUTHENTICATION_METHOD in app_settings.AuthenticationMethod.__dict__.values()
+assert isinstance(app_settings.EMAIL_REQUIRED, bool)
+assert isinstance(app_settings.UNIQUE_EMAIL, bool)
+assert app_settings.EMAIL_VERIFICATION in app_settings.EmailVerificationMethod.__dict__.values()
+assert isinstance(app_settings.USER_MODEL_USERNAME_FIELD, str) or app_settings.USER_MODEL_USERNAME_FIELD is None
+assert app_settings.MAX_EMAIL_ADDRESSES is None or isinstance(app_settings.MAX_EMAIL_ADDRESSES, int) and app_settings.MAX_EMAIL_ADDRESSES > 0
