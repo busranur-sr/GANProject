@@ -1,20 +1,21 @@
-from django.urls import path
 from . import views
-from ganapp.signup import signup
-from .views import archive_view
-from .views import delete_image
-from ganapp.signup import activate
-
-app_name = 'account'
+from . import signup
+from django.urls import path, include
+from django.views.generic.base import RedirectView
+from django.contrib.auth import views as auth_views
+from ganapp.home import result_view 
 urlpatterns = [
-    path("", views.login_view, name="login"),
-    path('accounts/signup/', signup, name='account_signup'),
+    path(
+        "accounts/login/",
+        auth_views.LoginView.as_view(template_name="account/login.html"),
+        name="account_login",
+    ),
+    path("accounts/", include("allauth.urls")),
     path("home/", views.home_view, name="home"),
-    path("logout/", views.logout_view, name="logout"),
-    path("archive/", archive_view, name="archive"),
-    path("delete_image/<int:image_id>/", delete_image, name="delete_image"),
-    path('activate/<str:uidb64>/<str:token>/', activate, name='activate'),
-  
-  # ...
-    # Diğer URL tanımları
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("archive/", views.archive_view, name="archive"),
+    path("delete_image/<int:image_id>/", views.delete_image, name="delete_image"),
+    path("activate/<str:uidb64>/<str:token>/", signup.activate, name="activate"),
+    path("result/", result_view, name="result"),
+
 ]
