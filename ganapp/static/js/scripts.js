@@ -43,6 +43,7 @@ $(".delete-image").click(function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('BurayaGiriyor');
     // Select the loading overlay
     var loadingOverlay = document.getElementById('loading-overlay');
 
