@@ -1,15 +1,11 @@
-import matplotlib
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
 import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import sigmoid
 
-from django.core.files import File
-from PIL import Image as PilImage
 from django.core.files.base import ContentFile
 from io import BytesIO
 import torch
@@ -115,7 +111,7 @@ class Cartoonize():
 
         # Load the generator model
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        generator_path = "ganapp/static/best_checkpoint.pth"
+        generator_path = "ganapp/static/cartoonGAN.pth"
 
         # Load the whole state_dict
         loaded_state = torch.load(generator_path)
@@ -137,21 +133,6 @@ class Cartoonize():
 
     def forward(self, image_path):
 
-        #image = PilImage.open(image_path)
-        # image = self.transform(image).unsqueeze(0).to(self.device)
-        # output_image = (output_image * 255).astype(np.uint8)
-
-        # output = self.generator(image).detach().cpu().clamp(0, 255).numpy()
-        # output_image = np.transpose(output[0], (1, 2, 0))
-        # plt.imsave('test.png', output_image)
-        
-        # output_image = (output_image * 255).astype(np.uint8)
-        # output_image = PilImage.fromarray(output_image.astype('uint8'))  # Convert the numpy array to a PIL Image
-
-        # output_io = BytesIO()
-        # output_image.save(output_io, format='PNG')     
-        # return ContentFile(output_io.getvalue(), 'cartoonized.png')
-
         image = Image.open(image_path)
         preprocess = transforms.Compose([
             transforms.Resize(256),
@@ -168,11 +149,6 @@ class Cartoonize():
 
         # Save the result image to a file
         result_image_pil.save('result_image.jpg')
-        #plt.imsave('test.png', result_image_np)
-                
-        #output_image = (result_image_np * 255).astype(np.uint8)
-        #output_image = PilImage.fromarray(output_image.astype('uint8'))  # Convert the numpy array to a PIL Image
-
         output_io = BytesIO()
         result_image_pil.save(output_io, format='PNG')     
         return ContentFile(output_io.getvalue(), 'cartoonized.png')
